@@ -1,0 +1,26 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies & build artifacts (frontend/.gitignore also applies)
+node_modules/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.vercel

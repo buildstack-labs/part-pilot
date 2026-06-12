@@ -1,0 +1,68 @@
+import type { Supplier } from "../types";
+
+export const SUPPLIERS: Supplier[] = [
+  {
+    id: "s1",
+    nameHe: "א.ל.מ חלפים",
+    nameEn: "ALM Parts",
+    country: "ישראל",
+    countryCode: "IL",
+    flag: "🇮🇱",
+    type: "local",
+    rating: 4.5,
+    deliveryDays: "1-2",
+    baseUrl: "https://example.com/alm",
+  },
+  {
+    id: "s2",
+    nameHe: "יינות ביתן מוטורס",
+    nameEn: "YB Motors",
+    country: "ישראל",
+    countryCode: "IL",
+    flag: "🇮🇱",
+    type: "local",
+    rating: 4.2,
+    deliveryDays: "2-3",
+    baseUrl: "https://example.com/yb",
+  },
+  {
+    id: "s3",
+    nameHe: "eBay מוטורס",
+    nameEn: "eBay Motors",
+    country: "גרמניה",
+    countryCode: "DE",
+    flag: "🇩🇪",
+    type: "international",
+    rating: 4.7,
+    deliveryDays: "10-14",
+    baseUrl: "https://example.com/ebay",
+  },
+  {
+    id: "s4",
+    nameHe: "Amayama",
+    nameEn: "Amayama",
+    country: "יפן",
+    countryCode: "JP",
+    flag: "🇯🇵",
+    type: "international",
+    rating: 4.8,
+    deliveryDays: "14-21",
+    baseUrl: "https://example.com/amayama",
+  },
+  {
+    id: "s5",
+    nameHe: "RockAuto",
+    nameEn: "RockAuto",
+    country: "ארה״ב",
+    countryCode: "US",
+    flag: "🇺🇸",
+    type: "international",
+    rating: 4.6,
+    deliveryDays: "10-15",
+    baseUrl: "https://example.com/rockauto",
+  },
+];
+
+export const SUPPLIERS_BY_ID = Object.fromEntries(
+  SUPPLIERS.map((s) => [s.id, s]),
+);
