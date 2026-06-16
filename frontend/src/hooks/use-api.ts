@@ -42,10 +42,10 @@ export function usePartDetail(partId: string) {
   });
 }
 
-export function useSupplierOffers(partId: string, filter: string) {
+export function useSupplierOffers(partId: string, plate: string, filter: string) {
   return useQuery({
-    queryKey: ["suppliers", partId, filter],
-    queryFn: () => api.getSupplierOffers(partId, filter),
+    queryKey: ["suppliers", partId, plate, filter],
+    queryFn: () => api.getSupplierOffers(partId, filter, plate),
     enabled: partId.length > 0,
   });
 }

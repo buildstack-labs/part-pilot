@@ -1,6 +1,6 @@
 import type { Part, PartCompatibility } from "../types";
 
-/** Spec seed set — 8 common maintenance parts */
+/** Spec seed set — 13 maintenance parts across all 10 categories */
 export const PARTS: Part[] = [
   {
     id: "c3000001-0000-4000-8000-000000000001",
@@ -77,12 +77,64 @@ export const PARTS: Part[] = [
     oemNumber: "25100-2B000",
     nameHe: "חיישן טמפרטורת קירור",
     nameEn: "Coolant Temp Sensor",
-    categoryId: "engine",
+    categoryId: "cooling",
     difficulty: "professional",
     description: "להחלפה בעת תקלה",
     imageKey: "coolant-temp-sensor",
   },
+  {
+    id: "c3000001-0000-4000-8000-000000000009",
+    oemNumber: "54617-2H000",
+    nameHe: "תושבת מתלה קדמית",
+    nameEn: "Front Strut Mount",
+    categoryId: "suspension",
+    difficulty: "professional",
+    description: "בדיקה בעת רעשים או שחיקה",
+    imageKey: "strut-mount",
+  },
+  {
+    id: "c3000001-0000-4000-8000-000000000010",
+    oemNumber: "56820-2H000",
+    nameHe: "קצה מוט כיוון",
+    nameEn: "Tie Rod End",
+    categoryId: "steering",
+    difficulty: "professional",
+    description: "בדיקה בעת רעידות בהיגוי",
+    imageKey: "tie-rod-end",
+  },
+  {
+    id: "c3000001-0000-4000-8000-000000000011",
+    oemNumber: "97701-2H000",
+    nameHe: "מדחס מיזוג",
+    nameEn: "A/C Compressor",
+    categoryId: "aircon",
+    difficulty: "professional",
+    description: "החלפה בעת אובדן קירור",
+    imageKey: "ac-compressor",
+  },
+  {
+    id: "c3000001-0000-4000-8000-000000000012",
+    oemNumber: "39210-2B000",
+    nameHe: "חיישן חמצן",
+    nameEn: "Oxygen Sensor",
+    categoryId: "exhaust",
+    difficulty: "intermediate",
+    description: "החלפה בעת נורת Check Engine",
+    imageKey: "oxygen-sensor",
+  },
+  {
+    id: "c3000001-0000-4000-8000-000000000013",
+    oemNumber: "37300-2H000",
+    nameHe: "אלטרנטור",
+    nameEn: "Alternator",
+    categoryId: "electrical",
+    difficulty: "professional",
+    description: "החלפה בעת בעיות טעינה",
+    imageKey: "alternator",
+  },
 ];
+
+import { GENERIC_MAINTENANCE_VARIANT_ID } from "../services/variant-resolver";
 
 const ALL_VARIANT_IDS = [
   "b2000001-0000-4000-8000-000000000001",
@@ -90,9 +142,10 @@ const ALL_VARIANT_IDS = [
   "b2000001-0000-4000-8000-000000000003",
   "b2000001-0000-4000-8000-000000000004",
   "b2000001-0000-4000-8000-000000000005",
+  GENERIC_MAINTENANCE_VARIANT_ID,
 ];
 
-/** All 8 parts compatible with all 5 seeded variants */
+/** All parts compatible with all seeded variants + generic maintenance */
 export const PART_COMPATIBILITIES: PartCompatibility[] = PARTS.flatMap((part) =>
   ALL_VARIANT_IDS.map((variantId) => ({ partId: part.id, variantId })),
 );

@@ -84,6 +84,14 @@ export const VEHICLE_VARIANTS: VehicleVariant[] = [
     yearFrom: 2019,
     yearTo: 2023,
   },
+  {
+    id: "b2000001-0000-4000-8000-000000000099",
+    modelId: "a1000001-0000-4000-8000-000000000001",
+    engine: "תחזוקה כללית",
+    trim: "Generic",
+    yearFrom: 1990,
+    yearTo: 2030,
+  },
 ];
 
 const baseSpecs = {
@@ -113,6 +121,7 @@ export const VEHICLES: Record<string, Vehicle> = {
     engine: "1.2L בנזין",
     variantId: "b2000001-0000-4000-8000-000000000001",
     hasPartsCatalog: true,
+    catalogTier: "fitment_verified",
     specs: {
       ...baseSpecs,
       power: "84 כוחות סוס",
@@ -148,6 +157,7 @@ export const VEHICLES: Record<string, Vehicle> = {
     engine: "1.8L בנזין",
     variantId: "b2000001-0000-4000-8000-000000000002",
     hasPartsCatalog: true,
+    catalogTier: "fitment_verified",
     specs: {
       ...baseSpecs,
       power: "122 כוחות סוס",
@@ -183,6 +193,7 @@ export const VEHICLES: Record<string, Vehicle> = {
     engine: "2.0L בנזין",
     variantId: "b2000001-0000-4000-8000-000000000003",
     hasPartsCatalog: true,
+    catalogTier: "fitment_verified",
     specs: {
       ...baseSpecs,
       power: "150 כוחות סוס",
@@ -220,6 +231,7 @@ export const VEHICLES: Record<string, Vehicle> = {
     engine: "1.3L בנזין",
     variantId: "b2000001-0000-4000-8000-000000000004",
     hasPartsCatalog: true,
+    catalogTier: "fitment_verified",
     specs: {
       ...baseSpecs,
       power: "102 כוחות סוס",
@@ -255,6 +267,7 @@ export const VEHICLES: Record<string, Vehicle> = {
     engine: "2.0L בנזין",
     variantId: "b2000001-0000-4000-8000-000000000005",
     hasPartsCatalog: true,
+    catalogTier: "fitment_verified",
     specs: {
       ...baseSpecs,
       power: "165 כוחות סוס",

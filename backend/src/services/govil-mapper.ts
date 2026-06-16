@@ -7,7 +7,7 @@ import {
   GOVIL_UNKNOWN,
   makeEnFromHebrew,
   parseManufacturer,
-  resolveHasPartsCatalog,
+  GENERIC_MAINTENANCE_VARIANT_ID,
   resolveVariantId,
 } from "./variant-resolver";
 
@@ -24,8 +24,12 @@ export function mapGovIlRecordToVehicle(record: GovIlVehicleRecord): Vehicle {
   const plate = formatPlateFromDigits(record.mispar_rechev);
   const color = record.tzeva_rechev?.trim() || GOVIL_UNKNOWN;
 
-  const variantId = resolveVariantId(makeHe, model, year);
-  const hasPartsCatalog = resolveHasPartsCatalog(variantId);
+  const matchedVariantId = resolveVariantId(makeHe, model, year);
+  const variantId = matchedVariantId ?? GENERIC_MAINTENANCE_VARIANT_ID;
+  const catalogTier = matchedVariantId
+    ? ("fitment_verified" as const)
+    : ("maintenance_generic" as const);
+  const hasPartsCatalog = true;
 
   const engineCode = record.degem_manoa?.trim();
   const fuel = record.sug_delek_nm?.trim();
@@ -50,6 +54,7 @@ export function mapGovIlRecordToVehicle(record: GovIlVehicleRecord): Vehicle {
     engine,
     variantId,
     hasPartsCatalog,
+    catalogTier,
     specs: {
       power: GOVIL_UNKNOWN,
       engineCC: GOVIL_UNKNOWN,

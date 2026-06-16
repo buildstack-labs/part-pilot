@@ -1,25 +1,34 @@
-import { PART_CATEGORIES, SEEDED_CATEGORY_IDS } from "../mocks/categories";
+import { PART_CATEGORIES } from "../mocks/categories";
 import { PART_COMPATIBILITIES, PARTS, PARTS_BY_ID } from "../mocks/parts";
-import { getVehicleByPlate } from "./vehicle-service";
+import { lookupVehicleByPlate } from "./vehicle-service";
+import {
+  getCategoryBrowseLinks,
+  type CategoryBrowseLink,
+} from "./category-supplier-links";
 import { NotFoundError } from "../types";
-import type { Part, PartCategory, PartCategoryId } from "../types";
+import type { Part, PartCategory, PartCategoryId, Vehicle } from "../types";
 
 export interface CategoryWithCount extends PartCategory {
   partCount: number;
   hasSeededParts: boolean;
+  /** Supplier category search when partCount is 0 */
+  browseLinks?: CategoryBrowseLink[];
 }
 
 export interface PartsCatalogResult {
   categories: CategoryWithCount[];
   hasCatalog: boolean;
+  catalogTier?: "fitment_verified" | "maintenance_generic";
   noCatalogReason?: string;
 }
 
-export function getPartsCatalog(plate: string): PartsCatalogResult {
-  const vehicle = getVehicleByPlate(plate);
-  if (!vehicle) {
-    throw new NotFoundError("רכב לא נמצא");
-  }
+async function resolveVehicle(plate: string): Promise<Vehicle> {
+  const result = await lookupVehicleByPlate(plate);
+  return result.vehicle;
+}
+
+export async function getPartsCatalog(plate: string): Promise<PartsCatalogResult> {
+  const vehicle = await resolveVehicle(plate);
 
   if (!vehicle.hasPartsCatalog || !vehicle.variantId) {
     return {
@@ -29,6 +38,7 @@ export function getPartsCatalog(plate: string): PartsCatalogResult {
         hasSeededParts: false,
       })),
       hasCatalog: false,
+      catalogTier: vehicle.catalogTier,
       noCatalogReason: "no_parts_data",
     };
   }
@@ -46,19 +56,26 @@ export function getPartsCatalog(plate: string): PartsCatalogResult {
     return {
       ...cat,
       partCount: count,
-      hasSeededParts: SEEDED_CATEGORY_IDS.has(cat.id) && count > 0,
+      hasSeededParts: count > 0,
+      browseLinks:
+        count === 0
+          ? getCategoryBrowseLinks(cat.id, vehicle, plate)
+          : undefined,
     };
   });
 
-  return { categories, hasCatalog: true };
+  return {
+    categories,
+    hasCatalog: true,
+    catalogTier: vehicle.catalogTier ?? "fitment_verified",
+  };
 }
 
-export function getPartsByCategory(
+export async function getPartsByCategory(
   plate: string,
   categoryId: PartCategoryId,
-): Part[] {
-  const vehicle = getVehicleByPlate(plate);
-  if (!vehicle) throw new NotFoundError("רכב לא נמצא");
+): Promise<Part[]> {
+  const vehicle = await resolveVehicle(plate);
   if (!vehicle.hasPartsCatalog || !vehicle.variantId) {
     return [];
   }

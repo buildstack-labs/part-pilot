@@ -11,8 +11,9 @@ export async function GET(request: Request, { params }: RouteParams) {
     const filter = (searchParams.get("filter") ?? "all") as
       | "all"
       | SupplierType;
+    const plate = searchParams.get("plate") ?? undefined;
 
-    const result = getSupplierOffers(partId, filter);
+    const result = await getSupplierOffers(partId, filter, { plate });
     return NextResponse.json({ offers: result.offers });
   } catch (e) {
     if (e instanceof NotFoundError) {

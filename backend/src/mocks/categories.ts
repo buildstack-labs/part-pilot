@@ -63,10 +63,16 @@ export const PART_CATEGORIES: PartCategory[] = [
   },
 ];
 
-/** Categories that have seeded parts in MVP */
+/** @deprecated Runtime uses partCount > 0; kept for legacy imports */
 export const SEEDED_CATEGORY_IDS = new Set([
   "filters",
   "brakes",
   "engine",
   "body",
+  "cooling",
+  "suspension",
+  "steering",
+  "aircon",
+  "exhaust",
+  "electrical",
 ]);

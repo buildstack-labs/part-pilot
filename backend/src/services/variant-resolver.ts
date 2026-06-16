@@ -1,5 +1,9 @@
 import { VEHICLE_VARIANTS } from "../mocks/vehicles";
 
+/** Fallback for gov.il vehicles without a seeded fitment variant */
+export const GENERIC_MAINTENANCE_VARIANT_ID =
+  "b2000001-0000-4000-8000-000000000099";
+
 const UNKNOWN = "לא ידוע";
 
 const MAKE_HE_TO_EN: Record<string, string> = {

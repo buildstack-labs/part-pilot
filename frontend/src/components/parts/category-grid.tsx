@@ -74,9 +74,13 @@ export function CategoryGrid({
                   </span>
                 )}
               </div>
-              {!cat.hasSeededParts && (
-                <span className="mt-1 inline-block text-[10px] font-semibold text-orange">
-                  בקרוב
+              {!cat.hasSeededParts ? (
+                <span className="mt-1 inline-block text-[10px] font-semibold text-muted">
+                  חפש אצל ספקים
+                </span>
+              ) : (
+                <span className="mt-1 inline-block text-[10px] font-semibold text-[#276749]">
+                  {cat.partCount} חלקים
                 </span>
               )}
             </div>

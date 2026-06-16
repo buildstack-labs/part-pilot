@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
 import { CategoryGrid } from "@/components/parts/category-grid";
 import { PartCard } from "@/components/parts/part-card";
+import { CategorySupplierBrowse } from "@/components/parts/category-supplier-browse";
 import { VehicleContextBar } from "@/components/vehicle/vehicle-context-bar";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -69,6 +70,14 @@ export function PartsCatalogView({ plate }: PartsCatalogViewProps) {
 
       <VehicleContextBar vehicle={vehicle} />
 
+      {catalog.catalogTier === "maintenance_generic" && (
+        <div className="mb-4 rounded-lg border border-orange bg-[#FFFBF5] px-4 py-3 text-[13px] text-[#744210]">
+          ℹ️ קטלוג תחזוקה כללי ל{vehicle.makeHe} {vehicle.model} {vehicle.year} — מספרי
+          OEM לדוגמה. השווה מחירים בחנויות וודא התאמה לפי מספר רישוי / VIN לפני
+          הזמנה.
+        </div>
+      )}
+
       <div className="mb-3.5 flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-xl font-extrabold text-navy">
           קטגוריות חלקים
@@ -96,11 +105,7 @@ export function PartsCatalogView({ plate }: PartsCatalogViewProps) {
           {partsLoading ? (
             <LoadingSpinner />
           ) : !selectedCat.hasSeededParts || (partsData?.parts.length ?? 0) === 0 ? (
-            <EmptyState
-              icon="🚧"
-              title="קטגוריה זו בדרך"
-              subtitle="החלקים בקטגוריה זו יתווספו בגרסה הבאה. בינתיים, נסה קטגוריה אחרת."
-            />
+            <CategorySupplierBrowse category={selectedCat} />
           ) : (
             <div className="flex flex-col gap-2.5">
               {partsData!.parts.map((part) => (

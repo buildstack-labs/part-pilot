@@ -70,9 +70,11 @@ export interface Vehicle {
   annualFee: string;
   engine: string;
   specs: VehicleSpecs;
-  /** Linked variant for parts compatibility; null = no catalog (e.g. i10 demo) */
+  /** Linked variant for parts compatibility; null = no catalog */
   variantId: string | null;
   hasPartsCatalog: boolean;
+  /** fitment_verified = OEM matched to variant; maintenance_generic = common maintenance browse */
+  catalogTier?: "fitment_verified" | "maintenance_generic";
   /** Set when WLTP composite key matches 2+ rows — specs stay unmerged until user picks */
   specCandidates?: WLTPSpecCandidate[];
 }
@@ -124,19 +126,43 @@ export interface Supplier {
   rating: number;
   deliveryDays: string;
   baseUrl: string;
+  /** Partner / affiliate — listed first in comparison UI */
+  isAffiliate: boolean;
+  /** Lower number = higher display priority within tier */
+  priority: number;
+  /** Supports vehicle lookup by Israeli license plate on supplier site */
+  supportsPlateLookup: boolean;
 }
 
-export interface PartOffer {
+/** How the offer row was sourced */
+export type OfferSourceType = "manual" | "referral" | "scraped" | "api";
+
+/** How the displayed price was obtained */
+export type PriceSource = "listed" | "estimate" | "on_site";
+
+/**
+ * Canonical supplier referral offer (sr_* layer).
+ * Manual fixtures are primary for MVP; API-sourced rows merge in when enabled.
+ */
+export interface SupplierOffer {
   id: string;
-  partId: string;
   supplierId: string;
+  partId: string;
   price: number;
   currency: string;
+  url: string;
+  /** Shipping in the same currency as price; 0 = free */
   shipping: number;
   inStock: boolean;
-  offerUrl: string;
-  lastCheckedAt: string;
+  lastUpdated: string;
+  sourceType: OfferSourceType;
+  priceSource: PriceSource;
+  /** Hebrew hint when price is estimated or only on supplier site */
+  priceNoteHe?: string;
 }
+
+/** @deprecated Use SupplierOffer — kept as alias for transitional imports */
+export type PartOffer = SupplierOffer;
 
 export interface PartCompatibility {
   partId: string;

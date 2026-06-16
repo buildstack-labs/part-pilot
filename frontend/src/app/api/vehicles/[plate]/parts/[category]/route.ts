@@ -8,9 +8,11 @@ type RouteParams = { params: Promise<{ plate: string; category: string }> };
 export async function GET(_request: Request, { params }: RouteParams) {
   try {
     const { plate, category } = await params;
-    const parts = getPartsByCategory(
-      decodeURIComponent(plate),
-      category as PartCategoryId,
+    const parts = (
+      await getPartsByCategory(
+        decodeURIComponent(plate),
+        category as PartCategoryId,
+      )
     ).map((p) => ({
       ...p,
       imageUrl: getPartImage(p.imageKey),

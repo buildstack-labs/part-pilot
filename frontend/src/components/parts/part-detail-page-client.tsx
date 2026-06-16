@@ -46,7 +46,7 @@ export function PartDetailPageClient({ plate, partId }: PartDetailPageClientProp
               ]}
             />
             <PartDetailHeader part={partData.part} vehicle={vehicleData.vehicle} />
-            <SupplierComparison partId={partId} />
+            <SupplierComparison partId={partId} plate={plate} />
           </div>
         )}
       </main>

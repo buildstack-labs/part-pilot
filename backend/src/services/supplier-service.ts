@@ -1,11 +1,12 @@
-import { getOffersForPart } from "../mocks/offers";
+import { getSupplierOffersForPart } from "./supplier-offer-store";
 import { SUPPLIERS_BY_ID } from "../mocks/suppliers";
 import { getPartById } from "./parts-service";
+import { lookupVehicleByPlate } from "./vehicle-service";
 import { NotFoundError } from "../types";
-import type { PartOffer, Supplier, SupplierType } from "../types";
+import type { Supplier, SupplierOffer, SupplierType } from "../types";
 
 export interface SupplierOfferDto {
-  offer: PartOffer;
+  offer: SupplierOffer;
   supplier: Supplier;
   totalPrice: number;
 }
@@ -15,22 +16,35 @@ export interface SupplierOffersResult {
   partId: string;
 }
 
-export function getSupplierOffers(
+export interface SupplierOffersOptions {
+  plate?: string;
+}
+
+export async function getSupplierOffers(
   partId: string,
   filter: "all" | SupplierType = "all",
-): SupplierOffersResult {
+  options: SupplierOffersOptions = {},
+): Promise<SupplierOffersResult> {
   const part = getPartById(partId);
   if (!part) throw new NotFoundError("חלק לא נמצא");
 
-  let offers = getOffersForPart(partId).map((offer) => {
-    const supplier = SUPPLIERS_BY_ID[offer.supplierId];
-    if (!supplier) throw new Error(`Missing supplier ${offer.supplierId}`);
-    return {
-      offer,
-      supplier,
-      totalPrice: offer.price + offer.shipping,
-    };
-  });
+  let vehicle = null;
+  if (options.plate) {
+    const lookup = await lookupVehicleByPlate(options.plate);
+    vehicle = lookup.vehicle;
+  }
+
+  let offers = (await getSupplierOffersForPart(partId, vehicle, options.plate)).map(
+    (offer) => {
+      const supplier = SUPPLIERS_BY_ID[offer.supplierId];
+      if (!supplier) throw new Error(`Missing supplier ${offer.supplierId}`);
+      return {
+        offer,
+        supplier,
+        totalPrice: offer.price + offer.shipping,
+      };
+    },
+  );
 
   if (filter === "local") {
     offers = offers.filter((o) => o.supplier.type === "local");
@@ -39,8 +53,14 @@ export function getSupplierOffers(
   }
 
   offers.sort((a, b) => {
+    if (a.supplier.isAffiliate !== b.supplier.isAffiliate) {
+      return a.supplier.isAffiliate ? -1 : 1;
+    }
+    if (a.supplier.priority !== b.supplier.priority) {
+      return a.supplier.priority - b.supplier.priority;
+    }
     if (a.supplier.type !== b.supplier.type) {
-      return a.supplier.type === "local" ? -1 : 1;
+      return a.supplier.type === "international" ? -1 : 1;
     }
     return a.totalPrice - b.totalPrice;
   });

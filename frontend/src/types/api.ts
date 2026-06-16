@@ -53,6 +53,7 @@ export interface VehicleDto {
   engine: string;
   specs: VehicleSpecs;
   hasPartsCatalog: boolean;
+  catalogTier?: "fitment_verified" | "maintenance_generic";
   specCandidates?: WLTPSpecCandidate[];
 }
 
@@ -84,11 +85,13 @@ export interface PartCategoryDto {
   subcats: string[];
   partCount: number;
   hasSeededParts: boolean;
+  browseLinks?: { supplierId: string; nameHe: string; url: string }[];
 }
 
 export interface PartsCatalogResponse {
   categories: PartCategoryDto[];
   hasCatalog: boolean;
+  catalogTier?: "fitment_verified" | "maintenance_generic";
   noCatalogReason?: string;
 }
 
@@ -114,22 +117,34 @@ export interface SupplierDto {
   type: SupplierType;
   rating: number;
   deliveryDays: string;
+  isAffiliate: boolean;
+  priority: number;
+  supportsPlateLookup: boolean;
 }
 
-export interface PartOfferDto {
+export type OfferSourceType = "manual" | "referral" | "scraped" | "api";
+export type PriceSource = "listed" | "estimate" | "on_site";
+
+export interface SupplierOfferDto {
   id: string;
-  partId: string;
   supplierId: string;
+  partId: string;
   price: number;
   currency: string;
+  url: string;
   shipping: number;
   inStock: boolean;
-  offerUrl: string;
-  lastCheckedAt: string;
+  lastUpdated: string;
+  sourceType: OfferSourceType;
+  priceSource: PriceSource;
+  priceNoteHe?: string;
 }
 
+/** @deprecated Use SupplierOfferDto */
+export type PartOfferDto = SupplierOfferDto;
+
 export interface SupplierOfferResponse {
-  offer: PartOfferDto;
+  offer: SupplierOfferDto;
   supplier: SupplierDto;
   totalPrice: number;
 }

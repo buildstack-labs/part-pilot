@@ -9,7 +9,15 @@ export const DIFFICULTY_MAP: Record<
   professional: { label: "מקצועי — מוסך", color: "#F56565", bg: "#FFF5F5" },
 };
 
-export function formatPrice(amount: number, currency = "ILS"): string {
-  if (currency === "ILS") return `${Math.round(amount)}₪`;
-  return `${amount} ${currency}`;
+export function formatPrice(
+  amount: number,
+  currency = "ILS",
+  priceSource: "listed" | "estimate" | "on_site" = "listed",
+): string {
+  if (priceSource === "on_site" || amount <= 0) return "מחיר באתר";
+  let formatted: string;
+  if (currency === "ILS") formatted = `${Math.round(amount)}₪`;
+  else if (currency === "USD") formatted = `$${amount.toFixed(2)}`;
+  else formatted = `${amount} ${currency}`;
+  return priceSource === "estimate" ? `~${formatted}` : formatted;
 }

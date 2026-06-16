@@ -43,10 +43,13 @@ export const api = {
   getPart: (partId: string) =>
     fetchJson<{ part: PartDto }>(`/api/parts/${encodeURIComponent(partId)}`),
 
-  getSupplierOffers: (partId: string, filter = "all") =>
-    fetchJson<{ offers: SupplierOfferResponse[] }>(
-      `/api/parts/${encodeURIComponent(partId)}/suppliers?filter=${filter}`,
-    ),
+  getSupplierOffers: (partId: string, filter = "all", plate?: string) => {
+    const params = new URLSearchParams({ filter });
+    if (plate) params.set("plate", plate);
+    return fetchJson<{ offers: SupplierOfferResponse[] }>(
+      `/api/parts/${encodeURIComponent(partId)}/suppliers?${params}`,
+    );
+  },
 
   getSupportedVehicles: () =>
     fetchJson<SupportedVehiclesResponse>("/api/vehicles"),
