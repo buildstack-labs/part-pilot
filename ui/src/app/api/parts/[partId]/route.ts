@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { NotFoundError, getPartById } from "@partpilot/backend";
+import { NotFoundError, getPartById } from "@partpilot/data-engine";
 import { getPartImage } from "@/lib/category-assets";
 
 type RouteParams = { params: Promise<{ partId: string }> };

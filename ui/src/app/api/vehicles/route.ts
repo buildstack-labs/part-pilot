@@ -6,7 +6,7 @@ import {
   toVehicleDto,
   PARTS,
   SUPPLIERS,
-} from "@partpilot/backend";
+} from "@partpilot/data-engine";
 
 export async function GET() {
   const vehicles = listSupportedVehicles().map(toVehicleDto);

@@ -1,98 +1,187 @@
-export interface SupplierRow {
+export type DifficultyLevel = "beginner" | "intermediate" | "professional";
+
+export type SupplierType = "local" | "international";
+
+export type PartCategoryId =
+  | "filters"
+  | "brakes"
+  | "engine"
+  | "body"
+  | "electrical"
+  | "suspension"
+  | "cooling"
+  | "exhaust"
+  | "steering"
+  | "aircon";
+
+/** WLTP catalog row exposed when composite key matches multiple variants */
+export interface WLTPSpecCandidate {
   id: string;
-  name_en: string;
-  name_he: string;
-  base_url: string;
-  country_code: string;
-  type: "local" | "international";
-  is_affiliate: boolean;
-  supports_plate_lookup: boolean;
+  degemNm: string;
+  trim: string;
+  engineDisplacementCc: number | null;
+  horsepower: number | null;
+  gearbox: string;
+  driveType: string;
+  fuelType: string;
+  doors: number | null;
+  bodyType: string;
+  /** Short Hebrew label for future disambiguation UI */
+  label: string;
+}
+
+export interface VehicleSpecs {
+  power: string;
+  engineCC: string;
+  fuelType: string;
+  gearbox: string;
+  transportCode: string;
+  registrationNote: string;
+  tireFront: string;
+  tireRear: string;
+  driveType: string;
+  driveNote: string;
+  airbags: string;
+  electricWindows: string;
+  doors: string;
+  bodyType: string;
+  sunroof: string;
+  stabilityControl: string;
+  abs: string;
+  powerSteering: string;
+  alloyWheels: string;
+  laneAssist: string;
+  adaptiveCruise: string;
+  pollutionGroup: string;
+}
+
+export interface Vehicle {
+  plate: string;
+  make: string;
+  makeHe: string;
+  model: string;
+  trim: string;
+  year: number;
+  color: string;
+  origin: string;
+  vin: string;
+  lastTest: string;
+  licenseExpiry: string;
+  annualFee: string;
+  engine: string;
+  specs: VehicleSpecs;
+  /** Linked variant for parts compatibility; null = no catalog */
+  variantId: string | null;
+  hasPartsCatalog: boolean;
+  /** fitment_verified = OEM matched to variant; maintenance_generic = common maintenance browse */
+  catalogTier?: "fitment_verified" | "maintenance_generic";
+  /** Set when WLTP composite key matches 2+ rows — specs stay unmerged until user picks */
+  specCandidates?: WLTPSpecCandidate[];
+}
+
+export interface VehicleModel {
+  id: string;
+  make: string;
+  makeHe: string;
+  model: string;
+  yearFrom: number;
+  yearTo: number;
+}
+
+export interface VehicleVariant {
+  id: string;
+  modelId: string;
+  engine: string;
+  trim: string;
+  yearFrom: number;
+  yearTo: number;
+}
+
+export interface PartCategory {
+  id: PartCategoryId;
+  nameHe: string;
+  nameEn: string;
+  subcats: string[];
+}
+
+export interface Part {
+  id: string;
+  oemNumber: string;
+  nameHe: string;
+  nameEn: string;
+  categoryId: PartCategoryId;
+  difficulty: DifficultyLevel;
+  description: string;
+  imageKey: string;
+}
+
+export interface Supplier {
+  id: string;
+  nameHe: string;
+  nameEn: string;
+  country: string;
+  countryCode: string;
+  flag: string;
+  type: SupplierType;
+  rating: number;
+  deliveryDays: string;
+  baseUrl: string;
+  /** Partner / affiliate — listed first in comparison UI */
+  isAffiliate: boolean;
+  /** Lower number = higher display priority within tier */
   priority: number;
-  rating: number | null;
-  delivery_days: string | null;
-  is_active: boolean;
+  /** Supports vehicle lookup by Israeli license plate on supplier site */
+  supportsPlateLookup: boolean;
 }
 
-export interface PartRow {
+/** How the offer row was sourced */
+export type OfferSourceType = "manual" | "referral" | "scraped" | "api";
+
+/** How the displayed price was obtained */
+export type PriceSource = "listed" | "estimate" | "on_site";
+
+/**
+ * Canonical supplier referral offer (sr_* layer).
+ * Manual fixtures are primary for MVP; API-sourced rows merge in when enabled.
+ */
+export interface SupplierOffer {
   id: string;
-  oem_number: string;
-  name_en: string;
-  name_he: string;
-  category_id: string;
-  difficulty: string;
-  is_active: boolean;
-}
-
-export interface PartAliasRow {
-  id: number;
-  part_id: string;
-  alias: string;
-  alias_raw: string;
-}
-
-export interface SupplierOfferRow {
-  id: string;
-  supplier_id: string;
-  part_id: string;
-  mpn: string;
-  url: string;
-  price: number;
-  currency: string;
-  shipping: number;
-  in_stock: boolean;
-  product_title: string | null;
-  source_type: string;
-  last_verified: string | null;
-  url_verified: boolean;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SyncLogRow {
-  id: number;
-  run_id: string;
-  started_at: string;
-  finished_at: string | null;
-  status: "running" | "completed" | "failed";
-  total_parts: number | null;
-  total_suppliers: number | null;
-  offers_upserted: number;
-  offers_failed: number;
-  offers_url_rejected: number;
-  error_message: string | null;
-  details: Record<string, unknown> | null;
-}
-
-export interface ScrapeResult {
   supplierId: string;
   partId: string;
-  mpn: string;
-  url: string;
   price: number;
   currency: string;
+  url: string;
+  /** Shipping in the same currency as price; 0 = free */
   shipping: number;
   inStock: boolean;
-  productTitle?: string;
+  lastUpdated: string;
+  sourceType: OfferSourceType;
+  priceSource: PriceSource;
+  /** Hebrew hint when price is estimated or only on supplier site */
+  priceNoteHe?: string;
 }
 
-export interface SyncDetail {
+/** @deprecated Use SupplierOffer — kept as alias for transitional imports */
+export type PartOffer = SupplierOffer;
+
+export interface PartCompatibility {
   partId: string;
-  oemNumber: string;
-  supplierId: string;
-  status: "ok" | "failed" | "url_rejected" | "no_product" | "no_price";
-  url?: string;
-  price?: number;
-  error?: string;
+  variantId: string;
 }
 
-export interface SyncRunStats {
-  runId: string;
-  startedAt: string;
-  totalParts: number;
-  totalSuppliers: number;
-  upserted: number;
-  failed: number;
-  urlRejected: number;
-  details: SyncDetail[];
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotFoundError";
+  }
+}
+
+export class ServiceError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string,
+  ) {
+    super(message);
+    this.name = "ServiceError";
+  }
 }

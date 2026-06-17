@@ -24,7 +24,7 @@ npm run lint      # ESLint
 
 `frontend/` — all contents copied here verbatim.
 
-## Package references to update after restructure
+## Package references
 
-- `@partpilot/backend` → `@partpilot/data-engine` (once `backend/` is renamed)
-- `sync:supplier-prices` script prefix path will change once `data-engine/` is reorganised
+- Depends on `@partpilot/data-engine` via `file:../data-engine`
+- `sync:supplier-prices` runs `npm run sync --prefix ../scheduler`

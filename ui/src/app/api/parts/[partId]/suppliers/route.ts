@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { NotFoundError, getSupplierOffers } from "@partpilot/backend";
-import type { SupplierType } from "@partpilot/backend";
+import { NotFoundError, getSupplierOffers } from "@partpilot/data-engine";
+import type { SupplierType } from "@partpilot/data-engine";
 
 type RouteParams = { params: Promise<{ partId: string }> };
 

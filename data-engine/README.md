@@ -1,10 +1,7 @@
 # data-engine
 
-> **Note:** This folder is named `data-engine-new/` temporarily because `data-engine/`
-> already exists at the repo root (the current price-sync package). Once that package
-> is split into `data-collectors/` and `scheduler/`, this folder will be renamed to
-> `data-engine/` and the package alias `@partpilot/backend` will become
-> `@partpilot/data-engine`.
+> Previously `backend/` (published as `@partpilot/backend`). Renamed to `data-engine/`
+> (`@partpilot/data-engine`) as part of the service restructure.
 
 Shared domain logic package consumed by `ui` (via Next.js build alias) and
 indirectly by `data-collectors` (for supplier/part definitions).

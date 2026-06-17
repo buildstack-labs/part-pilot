@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { NotFoundError, getPartsByCategory } from "@partpilot/backend";
-import type { PartCategoryId } from "@partpilot/backend";
+import { NotFoundError, getPartsByCategory } from "@partpilot/data-engine";
+import type { PartCategoryId } from "@partpilot/data-engine";
 import { getPartImage } from "@/lib/category-assets";
 
 type RouteParams = { params: Promise<{ plate: string; category: string }> };

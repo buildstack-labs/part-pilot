@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { NotFoundError, lookupVehicleByPlate, toVehicleDto } from "@partpilot/backend";
+import { NotFoundError, lookupVehicleByPlate, toVehicleDto } from "@partpilot/data-engine";
 
 type RouteParams = { params: Promise<{ plate: string }> };
 

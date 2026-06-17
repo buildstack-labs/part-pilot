@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@partpilot/backend"],
+  transpilePackages: ["@partpilot/data-engine"],
   serverExternalPackages: ["pg", "pg-native"],
   images: {
     formats: ["image/avif", "image/webp"],
