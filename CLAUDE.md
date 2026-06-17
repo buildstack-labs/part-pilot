@@ -9,10 +9,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 From `ui/`:
-
 ```bash
 npm run dev                   # Next.js dev server at http://localhost:3000
 npm run build                 # Production build
+npm run start                 # Serve the production build
 npm run lint                  # ESLint
 npm run sync:supplier-prices  # Trigger one-shot price sync via scheduler/
 ```
@@ -21,14 +21,16 @@ From `scheduler/`:
 ```bash
 npm run dev      # Start price-sync scheduler (node-cron, every 8 h)
 npm run sync     # One-shot sync run → writes to Postgres
+npm run lint     # TypeScript type-check
 ```
 
 From `data-collectors/`:
 ```bash
 npm run migrate  # Create/seed DB schema (run once after docker start)
+npm run lint     # TypeScript type-check
 ```
 
-`data-engine/` has no build step — its TypeScript is consumed directly by the Next.js build via the `@partpilot/data-engine` package alias.
+`data-engine/` has no scripts — its TypeScript is consumed directly by the Next.js build via the `@partpilot/data-engine` package alias.
 
 ## Architecture
 
