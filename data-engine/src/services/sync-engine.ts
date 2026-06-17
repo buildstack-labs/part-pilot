@@ -3,7 +3,7 @@ import { config } from "../config/index";
 import { logger } from "../logger/index";
 import { normalizeMpn } from "./mpn-normalizer";
 import { isDirectProductUrl, normalizeProductUrl, validateUrlLive } from "./url-validator";
-import { firecrawlExtractProduct } from "./firecrawl-client";
+import { firecrawlFindProductUrl, firecrawlExtractProduct } from "./firecrawl-client";
 import { buildSupplierSearchUrl } from "./supplier-link-builder";
 import { upsertOffer, startSyncLog, finishSyncLog } from "./offer-writer";
 import { getActiveParts, getActiveSuppliers } from "../db/queries";
@@ -31,36 +31,39 @@ async function scrapeOne(
   };
 
   const searchUrl = buildSupplierSearchUrl(supplier.id, part.oem_number, part.name_en);
-  log.debug(`→ search`, { supplier: supplier.id, oem: part.oem_number, url: searchUrl });
+  log.debug(`Step 1 — search`, { supplier: supplier.id, oem: part.oem_number, url: searchUrl });
 
-  let extracted = await firecrawlExtractProduct(searchUrl, part.oem_number, supplier.name_en);
+  // Step 1: find the product URL from the search results page (no price extracted here)
+  const found = await firecrawlFindProductUrl(searchUrl, part.oem_number, supplier.name_en);
 
-  if (!extracted.found || !extracted.product_url) {
-    log.info(`No product — ${supplier.id} / ${part.oem_number}`);
+  if (!found.found || !found.product_url) {
+    log.info(`No product found in search — ${supplier.id} / ${part.oem_number}`);
     return { result: null, detail: { ...base, status: "no_product" } };
   }
 
-  let productUrl = normalizeProductUrl(extracted.product_url, supplier.base_url);
+  let productUrl = normalizeProductUrl(found.product_url, supplier.base_url);
 
   if (!isDirectProductUrl(supplier.id, productUrl, part.oem_number)) {
-    log.warn(`Path check failed`, { url: productUrl });
+    log.warn(`Step 1 URL rejected (not a product page)`, { url: productUrl });
     return { result: null, detail: { ...base, status: "url_rejected", url: productUrl } };
   }
 
-  // If Firecrawl resolved to a different page, verify it directly
-  if (productUrl !== searchUrl) {
-    await sleep(config.firecrawl.delayMs);
-    log.debug(`→ verify product page`, { url: productUrl });
+  // Step 2: scrape the actual product page for the real price
+  await sleep(config.firecrawl.delayMs);
+  log.debug(`Step 2 — product page`, { url: productUrl });
 
-    const verified = await firecrawlExtractProduct(productUrl, part.oem_number, supplier.name_en);
-    if (verified.found) {
-      if (verified.product_url) {
-        const vUrl = normalizeProductUrl(verified.product_url, supplier.base_url);
-        if (isDirectProductUrl(supplier.id, vUrl, part.oem_number)) {
-          productUrl = vUrl;
-        }
-      }
-      extracted = { ...extracted, ...verified, product_url: productUrl };
+  const extracted = await firecrawlExtractProduct(productUrl, part.oem_number, supplier.name_en);
+
+  if (!extracted.found) {
+    log.info(`Product page did not confirm part — ${supplier.id} / ${part.oem_number}`, { url: productUrl });
+    return { result: null, detail: { ...base, status: "no_product", url: productUrl } };
+  }
+
+  // If Step 2 resolved a more canonical URL, prefer it
+  if (extracted.product_url) {
+    const canonicalUrl = normalizeProductUrl(extracted.product_url, supplier.base_url);
+    if (isDirectProductUrl(supplier.id, canonicalUrl, part.oem_number)) {
+      productUrl = canonicalUrl;
     }
   }
 

@@ -60,7 +60,7 @@ export function buildSupplierOfferUrl(
       return `https://www.amayama.com/en/parts/?q=${encodeQ(oemCompact)}`;
 
     case "impex-jp":
-      return `https://en.impex-jp.com/parts/new?partno=${oemEncoded}`;
+      return `https://en.impex-jp.com/?q=${encodeQ(oemCompact)}`;
 
     case "megazip":
       return `https://www.megazip.net/search?q=${encodeQ(oemCompact)}`;
