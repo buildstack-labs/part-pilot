@@ -15,6 +15,7 @@
     "lint":    "tsc --noEmit"
   },
   "dependencies": {
+    "@partpilot/data-engine": "file:../data-engine",
     "pg": "^8.13.1"
   },
   "devDependencies": {

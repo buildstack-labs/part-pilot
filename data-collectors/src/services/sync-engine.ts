@@ -4,7 +4,7 @@ import { logger } from "../logger/index";
 import { normalizeMpn } from "./mpn-normalizer";
 import { isDirectProductUrl, normalizeProductUrl, validateUrlLive } from "./url-validator";
 import { firecrawlFindProductUrl, firecrawlExtractProduct } from "./firecrawl-client";
-import { buildSupplierSearchUrl } from "./supplier-link-builder";
+import { buildSupplierOfferUrl } from "@partpilot/data-engine/services/supplier-link-builder";
 import { upsertOffer, startSyncLog, finishSyncLog } from "./offer-writer";
 import { getActiveParts, getActiveSuppliers } from "../db/queries";
 import type { ScrapeResult, SyncDetail, SyncRunStats } from "../types/index";
@@ -30,7 +30,7 @@ async function scrapeOne(
     supplierId: supplier.id,
   };
 
-  const searchUrl = buildSupplierSearchUrl(supplier.id, part.oem_number, part.name_en);
+  const searchUrl = buildSupplierOfferUrl(supplier.id, { oemNumber: part.oem_number, partNameEn: part.name_en, partNameHe: "" });
   log.debug(`Step 1 — search`, { supplier: supplier.id, oem: part.oem_number, url: searchUrl });
 
   // Step 1: find the product URL from the search results page (no price extracted here)
