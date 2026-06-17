@@ -8,23 +8,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-All commands run from the `frontend/` directory:
+From `ui/`:
 
 ```bash
 npm run dev                   # Next.js dev server at http://localhost:3000
 npm run build                 # Production build
 npm run lint                  # ESLint
-npm run sync:supplier-prices  # Trigger Firecrawl batch scraper via data-engine
+npm run sync:supplier-prices  # Trigger one-shot price sync via scheduler/
 ```
 
-From `data-engine/`:
+From `scheduler/`:
 ```bash
 npm run dev      # Start price-sync scheduler (node-cron, every 8 h)
 npm run sync     # One-shot sync run → writes to Postgres
+```
+
+From `data-collectors/`:
+```bash
 npm run migrate  # Create/seed DB schema (run once after docker start)
 ```
 
-The backend has no build step — its TypeScript is consumed directly by the Next.js build via the `@partpilot/backend` package alias.
+`data-engine/` has no build step — its TypeScript is consumed directly by the Next.js build via the `@partpilot/data-engine` package alias.
 
 ## Architecture
 
@@ -32,32 +36,45 @@ The backend has no build step — its TypeScript is consumed directly by the Nex
 
 ```
 part-pilot/
-├── backend/          # Shared business logic — published as @partpilot/backend
+├── ui/               # Next.js 15 + React 19 app — @partpilot/ui
+│   └── src/
+│       ├── app/api/  # Route Handlers — BFF layer calling data-engine services
+│       ├── components/
+│       ├── hooks/    # TanStack Query wrappers (use-api.ts)
+│       ├── stores/   # Zustand (search-store.ts — recent plates)
+│       ├── types/    # Frontend DTOs (api.ts)
+│       └── lib/      # api-client.ts, format.ts, cn.ts
+├── data-engine/      # Shared domain logic — @partpilot/data-engine
 │   └── src/
 │       ├── types/    # Core domain types (Vehicle, Part, Supplier, SupplierOffer)
 │       ├── services/ # Business logic (vehicle lookup, parts catalog, offers)
 │       ├── mocks/    # Static fixtures for demo plates
 │       ├── data/     # Manual offer price fixtures (manual-offers.fixture.ts)
 │       └── config/   # API keys / endpoint config
-├── data-engine/      # Price-sync service — @partpilot/data-engine
+├── data-collectors/  # Firecrawl scraping pipeline — @partpilot/data-collectors
 │   └── src/
 │       ├── db/       # Postgres client, schema.sql, migrate.ts
-│       ├── services/ # sync-engine.ts, url-validator.ts, firecrawl client
-│       ├── scheduler/# node-cron wrapper (cron.ts)
+│       ├── services/ # sync-engine.ts, firecrawl-client.ts, url-validator.ts
 │       ├── config/   # Loads repo-root .env, validates required vars
-│       ├── index.ts  # Long-running scheduler entry point
-│       └── sync-once.ts # One-shot sync for npm run sync
-├── frontend/         # Next.js 15 + React 19 app
+│       ├── logger/   # Structured logger
+│       └── types/    # Data-engine-specific types (SyncRunStats, ScrapeResult)
+├── scheduler/        # Cron entry points — @partpilot/scheduler
 │   └── src/
-│       ├── app/api/  # Route Handlers — BFF layer calling backend services
-│       ├── components/
-│       ├── hooks/    # TanStack Query wrappers (use-api.ts)
-│       ├── stores/   # Zustand (search-store.ts — recent plates)
-│       ├── types/    # Frontend DTOs (api.ts)
-│       └── lib/      # api-client.ts, format.ts, cn.ts
+│       ├── scheduler/cron.ts  # node-cron wrapper
+│       ├── index.ts           # Long-running process entry point
+│       └── sync-once.ts       # One-shot sync for npm run sync
 ├── scripts/          # register-startup-task.ps1, start-data-engine.ps1
-├── start-all.ps1     # Interactive dev launcher (Docker → DB → engine → Next.js)
+├── start-all.ps1     # Interactive dev launcher (Docker → DB → scheduler → Next.js)
 └── docs/             # firecrawl-supplier-sync.md, ebay-epn-setup.md
+```
+
+### Package Dependency Graph
+
+```
+ui  →  data-engine
+scheduler  →  data-collectors
+data-collectors  (standalone — no partpilot deps)
+data-engine      (standalone — no partpilot deps)
 ```
 
 ### Data Flow
@@ -70,12 +87,12 @@ Plate → vehicle resolved → `PART_COMPATIBILITIES` filtered by `variantId` �
 
 **Supplier Offers (priority order):**  
 1. Manual fixtures (`data/manual-offers.fixture.ts`) — highest priority
-2. Scraped DB rows (`supplier_offers` table in Postgres) — written by `data-engine`, read via `scraped-offer-store.ts` using `pg` Pool directly; returns `[]` gracefully if DB is unavailable
+2. Scraped DB rows (`supplier_offers` table in Postgres) — written by `data-collectors`, read via `scraped-offer-store.ts` using `pg` Pool directly; returns `[]` gracefully if DB is unavailable
 3. Referral search links — fallback (no price, just a URL)
 
 ### Key Type Contracts
 
-Domain types live in `backend/src/types/index.ts`. Frontend-facing DTOs live in `frontend/src/types/api.ts`. Backend services return domain types; Route Handlers transform them to DTOs before responding.
+Domain types live in `data-engine/src/types/index.ts`. Frontend-facing DTOs live in `ui/src/types/api.ts`. `data-engine` services return domain types; Route Handlers in `ui/src/app/api/` transform them to DTOs before responding.
 
 Important discriminated unions:
 - `PartCategoryId` — 10 string literals (`"filters" | "brakes" | "engine" | ...`)
@@ -83,16 +100,16 @@ Important discriminated unions:
 - `SupplierOffer.sourceType` — `"manual" | "referral" | "scraped" | "api"`
 - `SupplierOffer.priceSource` — `"listed" | "estimate" | "on_site"`
 
-### Frontend Patterns
+### UI Patterns
 
-- **API calls:** Always through `frontend/src/hooks/use-api.ts` (TanStack Query, staleTime 60s).
+- **API calls:** Always through `ui/src/hooks/use-api.ts` (TanStack Query, staleTime 60s).
 - **Routing:** `/vehicle/[plate]/parts/[partId]` — plate is always the normalized Israeli format (digits only, no dashes, in the URL).
 - **RTL:** The app is Hebrew-first. All user-facing text components support RTL. Hebrew strings appear in mocks and formatters.
-- **Path alias:** `@/*` maps to `frontend/src/*`.
+- **Path alias:** `@/*` maps to `ui/src/*`.
 
 ### Environment Variables
 
-`.env` at repo root (loaded by `data-engine`; `frontend/.env.local` for Next.js):
+`.env` at repo root (loaded by `data-collectors`; `ui/.env.local` for Next.js):
 
 ```
 DATABASE_URL=postgresql://partpilot:partpilot@localhost:5432/partpilot
@@ -102,8 +119,8 @@ FIRECRAWL_API_KEY=          # Firecrawl supplier price scraper
 Optional:
 ```
 FIRECRAWL_SCRAPE_DELAY_MS=2500
-SYNC_CRON_SCHEDULE=0 */8 * * *       # data-engine cron (default: every 8h)
-SYNC_ON_START=false                  # Run sync immediately on data-engine start
+SYNC_CRON_SCHEDULE=0 */8 * * *       # scheduler cron (default: every 8h)
+SYNC_ON_START=false                  # Run sync immediately on scheduler start
 SYNC_SUPPLIERS=partsouq,sparekorea   # Limit scraper scope
 SYNC_PARTS=26300-35505               # Limit scraper scope
 EBAY_BROWSE_API_ENABLED=false        # Future eBay integration
@@ -111,10 +128,10 @@ EBAY_BROWSE_API_ENABLED=false        # Future eBay integration
 
 ### Adding New Suppliers / Offers
 
-- **New supplier definition:** `backend/src/mocks/suppliers.ts` AND `data-engine/src/db/schema.sql` (INSERT into suppliers table)
-- **Verified manual prices:** `backend/src/data/manual-offers.fixture.ts`
-- **Scraped prices:** Run `npm run sync:supplier-prices` from `frontend/` (triggers `data-engine` one-shot sync → writes to Postgres)
-- **Browse links for empty categories:** `backend/src/services/category-supplier-links.ts`
+- **New supplier definition:** `data-engine/src/mocks/suppliers.ts` AND `data-collectors/src/db/schema.sql` (INSERT into suppliers table)
+- **Verified manual prices:** `data-engine/src/data/manual-offers.fixture.ts`
+- **Scraped prices:** Run `npm run sync:supplier-prices` from `ui/` (triggers `scheduler/` one-shot sync → writes to Postgres)
+- **Browse links for empty categories:** `data-engine/src/services/category-supplier-links.ts`
 
 ### Demo Plates (for local testing)
 
