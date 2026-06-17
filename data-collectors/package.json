@@ -3,25 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "exports": {
-    "./config":                   "./src/config/index.ts",
-    "./logger":                   "./src/logger/index.ts",
-    "./types":                    "./src/types/index.ts",
-    "./db":                       "./src/db/index.ts",
-    "./db/client":                "./src/db/client.ts",
-    "./services/sync-engine":     "./src/services/sync-engine.ts"
+    "./config": "./src/config/index.ts",
+    "./logger": "./src/logger/index.ts",
+    "./types": "./src/types/index.ts",
+    "./db": "./src/db/index.ts",
+    "./db/client": "./src/db/client.ts",
+    "./services/sync-engine": "./src/services/sync-engine.ts"
   },
   "scripts": {
     "migrate": "tsx src/db/migrate.ts",
-    "lint":    "tsc --noEmit"
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@partpilot/data-engine": "file:../data-engine",
+    "axios": "^1.18.0",
+    "cheerio": "^1.2.0",
     "pg": "^8.13.1"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/pg":   "^8.11.10",
-    "tsx":         "^4.19.4",
-    "typescript":  "^5"
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.4",
+    "typescript": "^5"
   }
 }

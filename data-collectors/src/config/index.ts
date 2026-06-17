@@ -32,8 +32,6 @@ export const config = {
     url: required("DATABASE_URL"),
   },
   firecrawl: {
-    apiKey: required("FIRECRAWL_API_KEY"),
-    baseUrl: optional("FIRECRAWL_API_BASE_URL", "https://api.firecrawl.dev/v1"),
     delayMs: Number(optional("FIRECRAWL_SCRAPE_DELAY_MS", "2500")),
   },
   sync: {
