@@ -1,0 +1,22 @@
+{
+  "name": "@partpilot/scheduler",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev":   "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "sync":  "tsx src/sync-once.ts",
+    "lint":  "tsc --noEmit"
+  },
+  "dependencies": {
+    "@partpilot/data-collectors": "file:../data-collectors",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node":      "^20",
+    "@types/node-cron": "^3.0.11",
+    "tsx":              "^4.19.4",
+    "typescript":       "^5"
+  }
+}
