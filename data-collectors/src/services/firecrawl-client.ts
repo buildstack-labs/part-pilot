@@ -1,5 +1,7 @@
 import { logger } from "../logger/index";
 import * as sparekorea from "./connectors/sparekorea";
+import * as megazip from "./connectors/megazip";
+import * as rockauto from "./connectors/rockauto";
 
 const log = logger("scraper");
 
@@ -20,6 +22,8 @@ export interface FoundProductUrl {
 
 function detectConnector(url: string): string | null {
   if (url.includes("sparekorea.com")) return "sparekorea";
+  if (url.includes("megazip.net"))    return "megazip";
+  if (url.includes("rockauto.com"))   return "rockauto";
   return null;
 }
 
@@ -35,8 +39,9 @@ export async function firecrawlFindProductUrl(
 ): Promise<FoundProductUrl> {
   const connector = detectConnector(searchUrl);
   switch (connector) {
-    case "sparekorea":
-      return sparekorea.findProductUrl(searchUrl, oemNumber);
+    case "sparekorea": return sparekorea.findProductUrl(searchUrl, oemNumber);
+    case "megazip":    return megazip.findProductUrl(searchUrl, oemNumber);
+    case "rockauto":   return rockauto.findProductUrl(searchUrl, oemNumber);
     default:
       log.warn(`No connector implemented for ${supplierName} — skipping`, { url: searchUrl });
       return { found: false };
@@ -55,8 +60,9 @@ export async function firecrawlExtractProduct(
 ): Promise<ExtractedProduct> {
   const connector = detectConnector(productUrl);
   switch (connector) {
-    case "sparekorea":
-      return sparekorea.extractProduct(productUrl, oemNumber);
+    case "sparekorea": return sparekorea.extractProduct(productUrl, oemNumber);
+    case "megazip":    return megazip.extractProduct(productUrl, oemNumber);
+    case "rockauto":   return rockauto.extractProduct(productUrl, oemNumber);
     default:
       log.warn(`No connector implemented for ${supplierName} — skipping`, { url: productUrl });
       return { found: false };
