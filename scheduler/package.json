@@ -4,9 +4,10 @@
   "private": true,
   "main": "./src/index.ts",
   "scripts": {
-    "dev":   "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
-    "sync":  "tsx src/sync-once.ts",
+    "prepare:collectors": "npm install --prefix ../data-collectors --no-audit --no-fund",
+    "dev":   "npm run prepare:collectors && tsx watch src/index.ts",
+    "start": "npm run prepare:collectors && tsx src/index.ts",
+    "sync":  "npm run prepare:collectors && tsx src/sync-once.ts",
     "lint":  "tsc --noEmit"
   },
   "dependencies": {
