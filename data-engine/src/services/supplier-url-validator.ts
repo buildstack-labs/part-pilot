@@ -39,6 +39,7 @@ export function isDirectProductUrl(
 
     case "megazip":
       return (
+        path.includes("/zapchasti-dlya/") ||
         path.includes("/part/") ||
         path.includes("/parts/") ||
         (path.includes("/search") && oemInUrl)
