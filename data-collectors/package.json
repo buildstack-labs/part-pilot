@@ -12,6 +12,7 @@
   },
   "scripts": {
     "migrate": "tsx src/db/migrate.ts",
+    "test:urls": "tsx src/services/url-validator.test.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
